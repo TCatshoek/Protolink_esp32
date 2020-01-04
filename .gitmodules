@@ -1,0 +1,6 @@
+[submodule "protobuf/ProtoLink_protobuf"]
+	path = protobuf/ProtoLink_protobuf
+	url = git@github.com:TCatshoek/ProtoLink_protobuf.git
+[submodule "protobuf/nanopb"]
+	path = protobuf/nanopb
+	url = git@github.com:nanopb/nanopb.git
