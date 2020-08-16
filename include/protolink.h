@@ -8,9 +8,10 @@
 #include <pb_decode.h>
 #include "protolink.pb.h"
 
+#include <functional>
 
 #if not defined ESP8266 && not defined ESP32
-    typedef unsigned int uint;
+typedef unsigned int uint;
     #include <cstdint>
     #include <string>
     #include <algorithm>
@@ -25,7 +26,7 @@
 
 #endif
 #if defined ESP8266 || defined ESP32
-    #define YIELD yield();
+#define YIELD yield();
     #define String String
     #define to_str(p) case(p): return #p;
     #define min min
@@ -81,7 +82,7 @@ private:
         }
 
         if (!pb_read(stream, p->fb, stream->bytes_left)) {
-            Serial.println("Dropped bad fb");
+            //Serial.println("Dropped bad fb");
             // p->state = State::ERR;
             // p->error_msg = "Error writing framebuffer into memory";
             // return false;
@@ -108,10 +109,20 @@ private:
         return true;
     }
 
+    // Dummy function so we don't blow up if we forget to set a function pointer
+    static void dummy() {
+    }
+
+    std::function<void(void)> _onFBReceived = &dummy;
+
 public:
     ProtoLink(uint8_t* fbp, uint fbs){
         fb = fbp;
         fb_size = fbs;
+    }
+
+    void onFBReceived(std::function<void(void)> cb) {
+        _onFBReceived = cb;
     }
 
     State init(Connection* c) {
@@ -184,6 +195,7 @@ private:
 
         switch(msg.which_c) {
             case Command_updatefb_tag:
+                _onFBReceived();
                 break; // handled in decoding callback
         }
 
